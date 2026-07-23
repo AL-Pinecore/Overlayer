@@ -2,7 +2,14 @@
 
 Key input monitor & information display app.
 
-Look at [Nuxt docs](https://nuxt.com/docs/getting-started/introduction) and [Nuxt UI docs](https://ui3.nuxt.dev) to learn more.
+## Credits
+
+https://github.com/CTRL-Neo-Studios/NuxtUI-Tauri-App-Template
+https://github.com/ahkohd/tauri-nspanel
+
+## Disclaimer
+
+Parts of the code were written using Claude Fable 5 & Gemini 3.6 thinking
 
 ## Setup
 

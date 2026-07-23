@@ -12,8 +12,15 @@ export default defineNuxtConfig({
       "@nuxt/icon",
       "@nuxt/fonts",
       "@nuxtjs/i18n",
+      "@pinia/nuxt",
       "@type32/nuxt-cs-utils",
     ],
+
+    colorMode: {
+        preference: 'system',
+        fallback: 'light',
+        classSuffix: ''
+    },
 
     css: ["~/assets/css/main.css"],
 
