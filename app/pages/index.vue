@@ -73,20 +73,60 @@ async function toggleOverlay() {
 function handleAddPanel() {
   // Experimental
   const panel = createPanel('Panel')
+
+  panel.x = 100
+  panel.y = 700
+
   panel.widgets.push(
       createWidget<KeyProps>('key', {
-        x: 100,
-        y: 800,
+        x: 0,
+        y: 0,
         zIndex: 1,
         props: {
-          keyBinding: 0,
+          keyBinding: 2,
           label: createWidget<KeyTextProps>('keyText', {
-            x: 19,
-            y: 20,
+            x: 25,
+            y: 15,
             zIndex: 2,
             props: {
-              content: 'A',
-              pressedContent: 'A',
+              content: 'Tab',
+              pressedContent: 'Tab',
+              fontSize: 16,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 0,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 2,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 55,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 18,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '1',
+              pressedContent: '1',
               fontSize: 18,
             },
           }),
@@ -99,20 +139,528 @@ function handleAddPanel() {
             },
           }),
         },
-      })
-  )
-  panel.widgets.push(
+      }),
       createWidget<RainProps>('rain', {
-        x: 100,
-        y: 800,
+        x: 55,
+        y: -5,
         zIndex: 2,
         props: {
           width: 50,
-          height: 200,
-          speed: 5,
-          keyBinding: 0,
+          keyBinding: 18,
         }
-      })
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 110,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 19,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '2',
+              pressedContent: '2',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 110,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 19,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 165,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 14,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: 'E',
+              pressedContent: 'E',
+              fontSize: 17,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 165,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 14,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 220,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 35,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: 'P',
+              pressedContent: 'P',
+              fontSize: 17,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 220,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 35,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 275,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 24,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 12,
+            zIndex: 2,
+            props: {
+              content: '=',
+              pressedContent: '=',
+              fontSize: 17,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 275,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 24,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 330,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 51,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '←',
+              pressedContent: '←',
+              fontSize: 16,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 330,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 51,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 385,
+        y: 0,
+        zIndex: 1,
+        props: {
+          keyBinding: 42,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '\\',
+              pressedContent: '\\',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 385,
+        y: -5,
+        zIndex: 2,
+        props: {
+          width: 50,
+          keyBinding: 42,
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 0,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 0,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '⇪',
+              pressedContent: '⇪',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 4,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 0,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 55,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 1,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: 'Ctrl',
+              pressedContent: 'Ctrl',
+              fontSize: 16,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 59,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 1,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 110,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 8,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 10,
+            zIndex: 2,
+            props: {
+              content: '␣',
+              pressedContent: '␣',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 114,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 8,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 165,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 49,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: 'C',
+              pressedContent: 'C',
+              fontSize: 17,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 169,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 49,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 220,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 26,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 10,
+            zIndex: 2,
+            props: {
+              content: '.',
+              pressedContent: '.',
+              fontSize: 24,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 224,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 26,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 275,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 47,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: 'Alt',
+              pressedContent: 'Alt',
+              fontSize: 16,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 279,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 47,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 330,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 5,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '↓',
+              pressedContent: '↓',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 334,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 5,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
+
+      createWidget<KeyProps>('key', {
+        x: 385,
+        y: 55,
+        zIndex: 1,
+        props: {
+          keyBinding: 36,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 25,
+            y: 15,
+            zIndex: 2,
+            props: {
+              content: '↵',
+              pressedContent: '↵',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      }),
+      createWidget<RainProps>('rain', {
+        x: 389,
+        y: -5,
+        zIndex: 3,
+        props: {
+          width: 42,
+          keyBinding: 36,
+          backgroundColor: {color: '#52525C', alpha: 1}
+        }
+      }),
   )
   overlayStore.addPanel(panel)
 }

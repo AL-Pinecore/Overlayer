@@ -160,6 +160,8 @@ pub fn init_mac_keyboard_hook(app_handle: AppHandle) {
                     event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE) as u32;
                 let is_down = matches!(event_type, CGEventType::KeyDown);
 
+//                 info!("{}", key_code);
+
                 let _ = handle.emit(
                     "global-key-state",
                     KeyEventPayload {
