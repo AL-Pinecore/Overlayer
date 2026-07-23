@@ -17,6 +17,7 @@ export const useOverlayStore = defineStore('overlay', () => {
 
     const activeKeysSet = new Set<number>()
     const keyClickTimestamps: number[] = []
+    const keyCounts = ref<Record<string, number>>({}) // key: countWidget.id
     let unlistenFn: UnlistenFn | null = null
 
     // ==================== Computeds ====================
@@ -99,11 +100,17 @@ export const useOverlayStore = defineStore('overlay', () => {
     }
 
     // ==================== Cross-window Sync ====================
+    function otherWindow(): string {
+        return getCurrentWindow().label === 'main' ? 'overlay' : 'main'
+    }
+
     async function syncPanelsToOtherWindows() {
-        const me = getCurrentWindow().label
-        const target = me === 'main' ? 'overlay' : 'main'
         const cleanData = JSON.parse(JSON.stringify(panels.value))
-        await emitTo(target, 'panels-updated', cleanData)
+        await emitTo(otherWindow(), 'panels-updated', cleanData)
+    }
+
+    async function syncKeyCountsToOtherWindows() {
+        await emitTo(otherWindow(), 'key-counts-updated', { ...keyCounts.value })
     }
 
     async function listenForPanelUpdates() {
@@ -112,19 +119,59 @@ export const useOverlayStore = defineStore('overlay', () => {
         })
     }
 
-    async function initMainSyncListener() {
-        await listen('request-initial-panels', () => {
-            syncPanelsToOtherWindows()
+    async function listenForKeyCountUpdates() {
+        await listen<Record<string, number>>('key-counts-updated', (event) => {
+            keyCounts.value = event.payload
         })
     }
 
+    // 主窗口：监听 Overlay 发来的“请求初始数据”信号
+    async function initMainSyncListener() {
+        await listen('request-initial-panels', () => {
+            syncPanelsToOtherWindows()
+            syncKeyCountsToOtherWindows() // 读盘恢复的计数也一并给 overlay
+        })
+    }
+
+    // Overlay 窗口：挂载时主动要一次数据
     async function requestInitialPanels() {
         await emitTo('main', 'request-initial-panels')
     }
 
+    // ==================== Persistence (Save / Load) ====================
+    function exportPanelsForSave(): Panel[] {
+        const data: Panel[] = JSON.parse(JSON.stringify(panels.value))
+        for (const p of data) {
+            for (const w of p.widgets) {
+                if (w.type === 'key') {
+                    w.countWidget.count = getKeyCount(w.countWidget.id)
+                }
+            }
+        }
+        return data
+    }
+
+    function importPanelsFromSave(data: Panel[]) {
+        const restored: Record<string, number> = {}
+        for (const p of data) {
+            for (const w of p.widgets) {
+                if (w.type === 'key') {
+                    if (typeof w.countWidget.count === 'number') {
+                        restored[w.countWidget.id] = w.countWidget.count
+                    }
+                    delete w.countWidget.count
+                }
+            }
+        }
+        panels.value = data
+        keyCounts.value = restored
+        syncPanelsToOtherWindows()
+        syncKeyCountsToOtherWindows()
+    }
+
     // ==================== Key Listener & KPS Actions ====================
     async function initGlobalKeyEventListener(): Promise<void> {
-        if (unlistenFn) return
+        if (unlistenFn) return // 避免重复注册
 
         unlistenFn = await listen<GlobalKeyStatePayload>(
             'global-key-state',
@@ -137,12 +184,18 @@ export const useOverlayStore = defineStore('overlay', () => {
                         activeKeysSet.add(code)
                         keyClickTimestamps.push(Date.now())
 
+                        let changed = false
                         for (const panel of panels.value) {
                             for (const w of panel.widgets) {
                                 if (w.type === 'key' && w.keyBinding === code) {
-                                    w.countWidget.count++
+                                    keyCounts.value[w.countWidget.id] =
+                                        (keyCounts.value[w.countWidget.id] ?? 0) + 1
+                                    changed = true
                                 }
                             }
+                        }
+                        if (changed) {
+                            syncKeyCountsToOtherWindows() // 让主窗口随时持有最新计数以便存盘
                         }
                     }
                 } else {
@@ -154,6 +207,15 @@ export const useOverlayStore = defineStore('overlay', () => {
 
     function isKeyPressed(keyCode: number): boolean {
         return activeKeysSet.has(keyCode)
+    }
+
+    function getKeyCount(id: string): number {
+        return keyCounts.value[id] ?? 0
+    }
+
+    function resetKeyCounts(): void {
+        keyCounts.value = {}
+        syncKeyCountsToOtherWindows()
     }
 
     function getCurrentKPS(): number {
@@ -184,10 +246,16 @@ export const useOverlayStore = defineStore('overlay', () => {
         activeKeysSet,
         initGlobalKeyEventListener,
         isKeyPressed,
+        getKeyCount,
+        resetKeyCounts,
         getCurrentKPS,
         listenForPanelUpdates,
+        listenForKeyCountUpdates,
         syncPanelsToOtherWindows,
+        syncKeyCountsToOtherWindows,
         initMainSyncListener,
         requestInitialPanels,
+        exportPanelsForSave,
+        importPanelsFromSave,
     }
 })

@@ -1,8 +1,9 @@
-import type { RGBA } from '~/models/Color'
+import type { RGBA } from '~/models/color'
 
 export interface OverlayStoreContext {
     isKeyPressed: (keyCode: number) => boolean
     getCurrentKPS: () => number
+    getKeyCount: (id: string) => number
 }
 
 interface WidgetBase {
@@ -34,7 +35,7 @@ export interface KeyTextWidget extends WidgetBase {
 
 export interface CountWidget extends WidgetBase {
     type: 'count'
-    count: number
+    count?: number
     font: string
     fontSize: number
     color: RGBA
@@ -73,10 +74,10 @@ const baseDefaults = (): WidgetBase => ({
 
 export function createCountWidget(o: Partial<CountWidget> = {}): CountWidget {
     return {
-        ...baseDefaults(), type: 'count', count: 0,
+        ...baseDefaults(), type: 'count',
         font: '', fontSize: 12,
-        pressedColor: { color: '#000000', alpha: 1 },
         color: { color: '#FFFFFF', alpha: 1 },
+        pressedColor: { color: '#000000', alpha: 1 },
         ...o,
     }
 }
@@ -85,8 +86,8 @@ export function createKeyTextWidget(o: Partial<KeyTextWidget> = {}): KeyTextWidg
     return {
         ...baseDefaults(), type: 'keyText',
         content: '', pressedContent: '', font: '', fontSize: 18,
-        pressedColor: { color: '#000000', alpha: 1 },
         color: { color: '#FFFFFF', alpha: 1 },
+        pressedColor: { color: '#000000', alpha: 1 },
         ...o,
     }
 }
@@ -97,8 +98,8 @@ export function createKeyWidget(o: Partial<KeyWidget> = {}): KeyWidget {
         width: 50, height: 50, keyBinding: 65,
         countWidget: createCountWidget(),
         label: createKeyTextWidget(),
-        pressedBackgroundColor: { color: '#FFFFFF', alpha: 0.5 },
         backgroundColor: { color: '#000000', alpha: 0.5 },
+        pressedBackgroundColor: { color: '#FFFFFF', alpha: 0.5 },
         radius: 3, borderSize: 1,
         borderColor: { color: '#FFFFFF', alpha: 1 },
         pressedBorderColor: { color: '#FFFFFF', alpha: 1 },

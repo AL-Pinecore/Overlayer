@@ -1,4 +1,4 @@
-import { rgbaToString } from '~/models/Color'
+import { rgbaToString } from '~/models/color'
 import type { Panel, Widget, KeyWidget, TextWidget, KeyTextWidget, CountWidget } from '~/models/widgets'
 import type { OverlayStoreContext } from '~/models/widgets'
 
@@ -16,12 +16,12 @@ function drawKeyText(ctx: Ctx, w: KeyTextWidget, _s: OverlayStoreContext, presse
     ctx.fillText(pressed ? w.pressedContent : w.content, 0, 0)
 }
 
-function drawCount(ctx: Ctx, w: CountWidget, _s: OverlayStoreContext, pressed: boolean) {
+function drawCount(ctx: Ctx, w: CountWidget, store: OverlayStoreContext, pressed: boolean) {
     ctx.font = `${w.fontSize}px ${w.font || 'sans-serif'}`
     ctx.fillStyle = rgbaToString(pressed ? w.pressedColor : w.color)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(String(w.count), 0, 0)
+    ctx.fillText(String(store.getKeyCount(w.id)), 0, 0)
 }
 
 function drawKey(ctx: Ctx, w: KeyWidget, store: OverlayStoreContext) {
