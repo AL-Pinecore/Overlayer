@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
 import InfoItemCard from '~/components/main-page/InfoItemCard.vue'
-import { useOverlayStore } from '~/stores/overlay'
+import { useOverlayStore } from '~/composables/stores/useOverlayStore.ts'
 import { storeToRefs } from 'pinia'
 
+import { createPanel, type Panel } from '~/models/widgets'
+import { createWidget, regenerateWidgetIds } from '~/widgets/registry'
 import {
-  createPanel,
-  createKeyWidget,
-  createKeyTextWidget,
-  createCountWidget,
-  type Panel,
-} from '~/models/widgets'
+  registerBuiltinWidgets,
+  type KeyProps,
+  type KeyTextProps,
+  type CountProps, type RainProps,
+} from '~/widgets/builtin'
+import type {RGBA} from "~/models/color.ts";
 
 const overlayStore = useOverlayStore()
 const { panels, isEnabled: overlayEnabled } = storeToRefs(overlayStore)
@@ -28,13 +30,8 @@ function handleMoreAction(panelName: string, action: string) {
 
       const copy: Panel = JSON.parse(JSON.stringify(targetPanel))
       copy.name = `${panelName} - Copy`
-      copy.widgets.forEach((w) => {
-        w.id = crypto.randomUUID()
-        if (w.type === 'key') {
-          w.countWidget.id = crypto.randomUUID()
-          w.label.id = crypto.randomUUID()
-        }
-      })
+      // Recursively assign fresh ids (children included), no per-type hardcoding
+      regenerateWidgetIds(copy.widgets)
 
       overlayStore.addPanel(copy)
       break
@@ -77,25 +74,44 @@ function handleAddPanel() {
   // Experimental
   const panel = createPanel('Panel')
   panel.widgets.push(
-      createKeyWidget({
+      createWidget<KeyProps>('key', {
         x: 100,
-        y: 100,
+        y: 800,
         zIndex: 1,
-        keyBinding: 0,
-        label: createKeyTextWidget({
-          x: 19,
-          y: 20,
-          content: 'A',
-          pressedContent: 'A',
-          fontSize: 18,
-          zIndex: 2,
-        }),
-        countWidget: createCountWidget({
-          x: 25,
-          y: 38,
-          fontSize: 12,
-          zIndex: 2,
-        }),
+        props: {
+          keyBinding: 0,
+          label: createWidget<KeyTextProps>('keyText', {
+            x: 19,
+            y: 20,
+            zIndex: 2,
+            props: {
+              content: 'A',
+              pressedContent: 'A',
+              fontSize: 18,
+            },
+          }),
+          countWidget: createWidget<CountProps>('count', {
+            x: 25,
+            y: 38,
+            zIndex: 2,
+            props: {
+              fontSize: 12,
+            },
+          }),
+        },
+      })
+  )
+  panel.widgets.push(
+      createWidget<RainProps>('rain', {
+        x: 100,
+        y: 800,
+        zIndex: 2,
+        props: {
+          width: 50,
+          height: 200,
+          speed: 5,
+          keyBinding: 0,
+        }
       })
   )
   overlayStore.addPanel(panel)
@@ -103,6 +119,7 @@ function handleAddPanel() {
 
 onMounted(async () => {
   await overlayStore.listenForPanelUpdates()
+  await overlayStore.listenForRuntimeStateUpdates() // Receives runtime state (counts) from overlay
   await overlayStore.initMainSyncListener()
 })
 </script>

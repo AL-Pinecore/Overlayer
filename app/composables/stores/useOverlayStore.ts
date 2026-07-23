@@ -2,7 +2,12 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { emitTo, listen, type UnlistenFn } from '@tauri-apps/api/event'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { createPanel as createPanelData, type Panel } from '~/models/widgets'
+import {
+    createPanel as createPanelData,
+    type Panel,
+    type OverlayStoreContext,
+} from '~/models/widgets'
+import { getWidgetDefinition, walkWidgets } from '~/widgets/registry'
 
 interface GlobalKeyStatePayload {
     code: number
@@ -15,9 +20,11 @@ export const useOverlayStore = defineStore('overlay', () => {
     const panels = ref<Panel[]>([])
     const activePanelId = ref<string | null>('')
 
+    // Runtime state: a generic KV indexed by widget id.
+    // Not part of panel sync (it has its own dedicated channel).
     const activeKeysSet = new Set<number>()
     const keyClickTimestamps: number[] = []
-    const keyCounts = ref<Record<string, number>>({}) // key: countWidget.id
+    const runtimeState = ref<Record<string, unknown>>({})
     let unlistenFn: UnlistenFn | null = null
 
     // ==================== Computeds ====================
@@ -99,6 +106,37 @@ export const useOverlayStore = defineStore('overlay', () => {
         syncPanelsToOtherWindows()
     }
 
+    // ==================== Runtime State (generic KV) ====================
+    function getRuntimeState<T>(id: string): T | undefined {
+        return runtimeState.value[id] as T | undefined
+    }
+
+    let runtimeSyncScheduled = false
+    function setRuntimeState(id: string, value: unknown): void {
+        runtimeState.value[id] = value
+        // Microtask-level batching: multiple writes within the same tick sync only once
+        if (!runtimeSyncScheduled) {
+            runtimeSyncScheduled = true
+            queueMicrotask(() => {
+                runtimeSyncScheduled = false
+                syncRuntimeStateToOtherWindows()
+            })
+        }
+    }
+
+    function resetRuntimeState(): void {
+        runtimeState.value = {}
+        syncRuntimeStateToOtherWindows()
+    }
+
+    // Context object passed to WidgetDefinition callbacks and renderers
+    const storeContext: OverlayStoreContext = {
+        isKeyPressed,
+        getCurrentKPS,
+        getRuntimeState,
+        setRuntimeState,
+    }
+
     // ==================== Cross-window Sync ====================
     function otherWindow(): string {
         return getCurrentWindow().label === 'main' ? 'overlay' : 'main'
@@ -109,8 +147,8 @@ export const useOverlayStore = defineStore('overlay', () => {
         await emitTo(otherWindow(), 'panels-updated', cleanData)
     }
 
-    async function syncKeyCountsToOtherWindows() {
-        await emitTo(otherWindow(), 'key-counts-updated', { ...keyCounts.value })
+    async function syncRuntimeStateToOtherWindows() {
+        await emitTo(otherWindow(), 'runtime-state-updated', { ...runtimeState.value })
     }
 
     async function listenForPanelUpdates() {
@@ -119,59 +157,67 @@ export const useOverlayStore = defineStore('overlay', () => {
         })
     }
 
-    async function listenForKeyCountUpdates() {
-        await listen<Record<string, number>>('key-counts-updated', (event) => {
-            keyCounts.value = event.payload
+    async function listenForRuntimeStateUpdates() {
+        await listen<Record<string, unknown>>('runtime-state-updated', (event) => {
+            runtimeState.value = event.payload
         })
     }
 
-    // 主窗口：监听 Overlay 发来的“请求初始数据”信号
+    // Main window: respond to the overlay's "request initial data" signal
     async function initMainSyncListener() {
         await listen('request-initial-panels', () => {
             syncPanelsToOtherWindows()
-            syncKeyCountsToOtherWindows() // 读盘恢复的计数也一并给 overlay
+            syncRuntimeStateToOtherWindows()
         })
     }
 
-    // Overlay 窗口：挂载时主动要一次数据
+    // Overlay window: actively request data once on mount
     async function requestInitialPanels() {
         await emitTo('main', 'request-initial-panels')
     }
 
     // ==================== Persistence (Save / Load) ====================
+    /**
+     * Export a snapshot for saving: runtime state is written back into each
+     * widget's `runtime` field, keyed by widget id.
+     * Call this in the window that holds up-to-date runtime state
+     * (main window must be kept in sync via listenForRuntimeStateUpdates).
+     */
     function exportPanelsForSave(): Panel[] {
         const data: Panel[] = JSON.parse(JSON.stringify(panels.value))
         for (const p of data) {
-            for (const w of p.widgets) {
-                if (w.type === 'key') {
-                    w.countWidget.count = getKeyCount(w.countWidget.id)
+            walkWidgets(p.widgets, (w) => {
+                if (w.id in runtimeState.value) {
+                    w.runtime = runtimeState.value[w.id]
                 }
-            }
+            })
         }
         return data
     }
 
+    /**
+     * Restore from saved data: extract `runtime` fields into runtimeState,
+     * keeping panels as pure configuration.
+     */
     function importPanelsFromSave(data: Panel[]) {
-        const restored: Record<string, number> = {}
+        const restored: Record<string, unknown> = {}
         for (const p of data) {
-            for (const w of p.widgets) {
-                if (w.type === 'key') {
-                    if (typeof w.countWidget.count === 'number') {
-                        restored[w.countWidget.id] = w.countWidget.count
-                    }
-                    delete w.countWidget.count
+            walkWidgets(p.widgets, (w) => {
+                if (w.runtime !== undefined) {
+                    restored[w.id] = w.runtime
+                    delete w.runtime
                 }
-            }
+            })
         }
         panels.value = data
-        keyCounts.value = restored
+        runtimeState.value = restored
         syncPanelsToOtherWindows()
-        syncKeyCountsToOtherWindows()
+        syncRuntimeStateToOtherWindows()
     }
 
     // ==================== Key Listener & KPS Actions ====================
     async function initGlobalKeyEventListener(): Promise<void> {
-        if (unlistenFn) return // 避免重复注册
+        if (unlistenFn) return // Avoid duplicate registration
 
         unlistenFn = await listen<GlobalKeyStatePayload>(
             'global-key-state',
@@ -179,23 +225,18 @@ export const useOverlayStore = defineStore('overlay', () => {
                 const { code, down } = event.payload
 
                 if (down) {
-                    // ignore repeated KeyDown events
+                    // Ignore repeated KeyDown events
                     if (!activeKeysSet.has(code)) {
                         activeKeysSet.add(code)
                         keyClickTimestamps.push(Date.now())
 
-                        let changed = false
+                        // Dispatch to every widget (including children) that declares onGlobalKeyDown
                         for (const panel of panels.value) {
-                            for (const w of panel.widgets) {
-                                if (w.type === 'key' && w.keyBinding === code) {
-                                    keyCounts.value[w.countWidget.id] =
-                                        (keyCounts.value[w.countWidget.id] ?? 0) + 1
-                                    changed = true
-                                }
-                            }
-                        }
-                        if (changed) {
-                            syncKeyCountsToOtherWindows() // 让主窗口随时持有最新计数以便存盘
+                            walkWidgets(panel.widgets, (w) => {
+                                getWidgetDefinition(w.type)?.onGlobalKeyDown?.(
+                                    w, code, storeContext
+                                )
+                            })
                         }
                     }
                 } else {
@@ -207,15 +248,6 @@ export const useOverlayStore = defineStore('overlay', () => {
 
     function isKeyPressed(keyCode: number): boolean {
         return activeKeysSet.has(keyCode)
-    }
-
-    function getKeyCount(id: string): number {
-        return keyCounts.value[id] ?? 0
-    }
-
-    function resetKeyCounts(): void {
-        keyCounts.value = {}
-        syncKeyCountsToOtherWindows()
     }
 
     function getCurrentKPS(): number {
@@ -246,13 +278,14 @@ export const useOverlayStore = defineStore('overlay', () => {
         activeKeysSet,
         initGlobalKeyEventListener,
         isKeyPressed,
-        getKeyCount,
-        resetKeyCounts,
+        getRuntimeState,
+        setRuntimeState,
+        resetRuntimeState,
         getCurrentKPS,
         listenForPanelUpdates,
-        listenForKeyCountUpdates,
+        listenForRuntimeStateUpdates,
         syncPanelsToOtherWindows,
-        syncKeyCountsToOtherWindows,
+        syncRuntimeStateToOtherWindows,
         initMainSyncListener,
         requestInitialPanels,
         exportPanelsForSave,

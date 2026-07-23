@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useOverlayStore } from '~/stores/overlay'
+import { useOverlayStore } from '~/composables/stores/useOverlayStore.ts'
 import { drawPanel } from '~/render/widgets'
 
 const overlayStore = useOverlayStore()
