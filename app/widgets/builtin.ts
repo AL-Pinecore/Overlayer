@@ -175,6 +175,8 @@ export function registerBuiltinWidgets(): void {
             const p = w.props
             const pressed = store.isKeyPressed(p.keyBinding)
 
+            const rainX = -(p.width / 2)
+
             let state = rainStates.get(w.id)
             if (!state) {
                 state = { bars: [], currentBar: null, wasPressed: false, lastTime: performance.now() }
@@ -230,9 +232,9 @@ export function registerBuiltinWidgets(): void {
                 const h = bar.y + bar.height - y
 
                 if (useRadius) {
-                    ctx.roundRect(0, y, p.width, h, p.radius)
+                    ctx.roundRect(rainX, y, p.width, h, p.radius)
                 } else {
-                    ctx.rect(0, y, p.width, h)
+                    ctx.rect(rainX, y, p.width, h)
                 }
             }
 

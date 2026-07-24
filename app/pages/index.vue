@@ -105,7 +105,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 0,
+        x: 25,
         y: -5,
         zIndex: 2,
         props: {
@@ -141,7 +141,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 55,
+        x: 80,
         y: -5,
         zIndex: 2,
         props: {
@@ -177,7 +177,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 110,
+        x: 135,
         y: -5,
         zIndex: 2,
         props: {
@@ -213,7 +213,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 165,
+        x: 190,
         y: -5,
         zIndex: 2,
         props: {
@@ -249,7 +249,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 220,
+        x: 245,
         y: -5,
         zIndex: 2,
         props: {
@@ -285,7 +285,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 275,
+        x: 300,
         y: -5,
         zIndex: 2,
         props: {
@@ -321,7 +321,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 330,
+        x: 355,
         y: -5,
         zIndex: 2,
         props: {
@@ -357,7 +357,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 385,
+        x: 410,
         y: -5,
         zIndex: 2,
         props: {
@@ -393,7 +393,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 4,
+        x: 25,
         y: -5,
         zIndex: 3,
         props: {
@@ -430,7 +430,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 59,
+        x: 80,
         y: -5,
         zIndex: 3,
         props: {
@@ -448,11 +448,11 @@ function handleAddPanel() {
           keyBinding: 8,
           label: createWidget<KeyTextProps>('keyText', {
             x: 25,
-            y: 10,
+            y: 15,
             zIndex: 2,
             props: {
-              content: '␣',
-              pressedContent: '␣',
+              content: 'C',
+              pressedContent: 'C',
               fontSize: 18,
             },
           }),
@@ -467,7 +467,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 114,
+        x: 135,
         y: -5,
         zIndex: 3,
         props: {
@@ -485,11 +485,11 @@ function handleAddPanel() {
           keyBinding: 49,
           label: createWidget<KeyTextProps>('keyText', {
             x: 25,
-            y: 15,
+            y: 10,
             zIndex: 2,
             props: {
-              content: 'C',
-              pressedContent: 'C',
+              content: '␣',
+              pressedContent: '␣',
               fontSize: 17,
             },
           }),
@@ -504,7 +504,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 169,
+        x: 190,
         y: -5,
         zIndex: 3,
         props: {
@@ -541,7 +541,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 224,
+        x: 245,
         y: -5,
         zIndex: 3,
         props: {
@@ -578,7 +578,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 279,
+        x: 300,
         y: -5,
         zIndex: 3,
         props: {
@@ -615,7 +615,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 334,
+        x: 355,
         y: -5,
         zIndex: 3,
         props: {
@@ -652,7 +652,7 @@ function handleAddPanel() {
         },
       }),
       createWidget<RainProps>('rain', {
-        x: 389,
+        x: 410,
         y: -5,
         zIndex: 3,
         props: {
